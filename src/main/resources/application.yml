@@ -2,5 +2,5 @@ server:
   port: 8080
 
 vk:
-  group.id: 184605473
-  access.token: a3dcdf555415aa8e69b9a56991c54fbb39a60d8dc96f885220ddbde1819355fd8686ef87425fe2f087ae8
+  group.id: YOUR_GROUP_ID
+  access.token: YOUR_ACCESS_TOKEN
