@@ -25,7 +25,7 @@ public class VkApiService {
 
     public JsonElement getLongPollServerResponse() {
         String url = String.format("https://api.vk.com/method/groups.getLongPollServer?group_id=%d&access_token=%s&v=5.131",
-                vkConfig.getGroup().getId(), vkConfig.getAccess().getToken());
+                vkConfig.getGroupId(), vkConfig.getAccessToken());
         String response = restTemplate.getForObject(url, String.class);
         return JsonParser.parseString(response).getAsJsonObject().getAsJsonObject("response");
     }
@@ -34,7 +34,7 @@ public class VkApiService {
         String url = "https://api.vk.com/method/messages.send";
         String params = String.format(
                 "?user_id=%d&message=%s&random_id=%d&access_token=%s&v=5.131",
-                userId, message, System.currentTimeMillis(), vkConfig.getAccess().getToken());
+                userId, message, System.currentTimeMillis(), vkConfig.getAccessToken());
         restTemplate.getForObject(url + params, String.class);
     }
 }

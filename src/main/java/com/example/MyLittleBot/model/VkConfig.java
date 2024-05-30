@@ -9,16 +9,6 @@ import org.springframework.stereotype.Component;
 @ConfigurationProperties(prefix = "vk")
 public class VkConfig {
 
-    private Group group;
-    private Access access;
-
-    @Data
-    public static class Group {
-        private int id;
-    }
-
-    @Data
-    public static class Access {
-        private String token;
-    }
+    private int groupId;
+    private String accessToken;
 }
