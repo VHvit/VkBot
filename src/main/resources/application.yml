@@ -2,5 +2,5 @@ server:
   port: 8080
 
 vk:
-  group.id: YOUR_GROUP_ID
-  access.token: YOUR_ACCESS_TOKEN
+  group-id: YOUR_GROUP_ID
+  access-token: YOUR_ACCESS_TOKEN
