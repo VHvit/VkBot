@@ -3,7 +3,6 @@ package com.example.MyLittleBot.service;
 import com.example.MyLittleBot.model.VkConfig;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -15,17 +14,12 @@ import org.springframework.web.client.RestTemplate;
 @RequiredArgsConstructor
 public class VkBotService {
 
-    private final VkConfig callbackConfirmation;
+    private final VkApiService vkApiService;
     private final RestTemplate restTemplate = new RestTemplate();
 
     private String server;
     private String key;
     private String ts;
-
-    @PostConstruct
-    private void postConstruct() {
-        initializeLongPollServer();
-    }
 
     @Scheduled(fixedDelay = 1000)
     public void pollServer() {
@@ -37,43 +31,31 @@ public class VkBotService {
 
         String response = restTemplate.getForObject(url, String.class);
 
-        JsonObject jsonObject = JsonParser.parseString(response).getAsJsonObject();
+        JsonElement jsonElement = JsonParser.parseString(response);
+        String newTs = jsonElement.getAsJsonObject().get("ts").getAsString(); // Обновляем значение ts
 
-        ts = jsonObject.get("ts").getAsString();
-        JsonArray updates = jsonObject.get("updates").getAsJsonArray();
+        JsonArray updates = jsonElement.getAsJsonObject().getAsJsonArray("updates");
 
         for (JsonElement updateElement : updates) {
-            JsonObject update = updateElement.getAsJsonObject();
-            if ("message_new".equals(update.get("type").getAsString())) {
-                JsonObject message = update.getAsJsonObject("object");
-                JsonElement fromIdElement = message.get("from_id");
+            JsonElement update = updateElement.getAsJsonObject();
+            if ("message_new".equals(update.getAsJsonObject().get("type").getAsString())) {
+                JsonElement message = update.getAsJsonObject().get("object");
+                JsonElement fromIdElement = message.getAsJsonObject().get("from_id");
                 if (fromIdElement != null && !fromIdElement.isJsonNull()) {
                     int userId = fromIdElement.getAsInt();
-                    String text = message.get("text").getAsString();
-                    sendMessage(userId, "Вы сказали: " + text);
+                    String text = message.getAsJsonObject().get("text").getAsString();
+                    vkApiService.sendMessage(userId, "Вы сказали: " + text);
                 }
             }
         }
+
+        ts = newTs;
     }
 
     private void initializeLongPollServer() {
-        String url = String.format("https://api.vk.com/method/groups.getLongPollServer?group_id=%d&access_token=%s&v=5.131",
-                callbackConfirmation.getGroup().getId(), callbackConfirmation.getAccess().getToken());
-        String response = restTemplate.getForObject(url, String.class);
-
-        JsonObject jsonObject = JsonParser.parseString(response).getAsJsonObject().getAsJsonObject("response");
-
-        server = jsonObject.get("server").getAsString();
-        key = jsonObject.get("key").getAsString();
-        ts = jsonObject.get("ts").getAsString();
-    }
-
-    private void sendMessage(int userId, String message) {
-        String url = "https://api.vk.com/method/messages.send";
-        String params = String.format(
-                "?user_id=%d&message=%s&random_id=%d&access_token=%s&v=5.131",
-                userId, message, System.currentTimeMillis(), callbackConfirmation.getAccess().getToken());
-
-        restTemplate.getForObject(url + params, String.class);
+        JsonElement longPollServerResponse = vkApiService.getLongPollServerResponse();
+        this.server = longPollServerResponse.getAsJsonObject().get("server").getAsString();
+        this.key = longPollServerResponse.getAsJsonObject().get("key").getAsString();
+        this.ts = longPollServerResponse.getAsJsonObject().get("ts").getAsString();
     }
 }
