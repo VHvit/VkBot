@@ -6,11 +6,9 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class VKUpdates {
-
+public class UpdateResponse {
     @JsonProperty("ts")
-    private String ts;
-
+    private String timestamp;
     @JsonProperty("updates")
     private List<Update> updates;
 }

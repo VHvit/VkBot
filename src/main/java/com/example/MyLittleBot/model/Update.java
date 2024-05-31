@@ -1,10 +1,12 @@
 package com.example.MyLittleBot.model;
 
-import com.google.gson.JsonObject;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 @Data
 public class Update {
+    @JsonProperty("type")
     private String type;
-    private JsonObject object;
+    @JsonProperty("object")
+    private UpdateObject updateObject;
 }
